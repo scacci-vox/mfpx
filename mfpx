@@ -1,0 +1,113 @@
+#!/bin/sh
+
+VERSION=1.0.0
+
+FILES="blitz.csv classic.csv rapid.csv"
+
+if [ -z $MFPX_BASE ]; then
+	if [ -z $XDG_DATA_HOME ]; then
+		XDG_DATA_HOME=$HOME"/.local/share"
+	fi
+	MFPX_BASE=$XDG_DATA_HOME/mfpx
+fi
+
+MFPX_DB=$MFPX_BASE/fpx.db
+MFPX_LOG=$MFPX_BASE/wget.log
+
+
+#
+# Download lists
+#
+extract () {
+	mkdir -p $MFPX_BASE/lists;
+	cd $MFPX_BASE/lists;
+	wget -a $MFPX_LOG http://elo.fpx.pt/lista_elo_actual.php -O classic.csv
+	if [ $? -ne 0 ];then echo "Fail extract classic.csv";exit;fi
+	wget -a $MFPX_LOG  http://elo.fpx.pt/elo_csv.php?lista=r -O rapid.csv
+	if [ $? -ne 0 ];then echo "Fail extract rapid.csv";exit;fi
+	wget -a $MFPX_LOG  http://elo.fpx.pt/elo_csv.php?lista=b -O blitz.csv
+	if [ $? -ne 0 ];then echo "Fail extract blitz.csv";exit;fi
+	cd ->/dev/null;
+}
+
+#
+# converting lists to utf-8 if needed
+#
+
+convert () {
+	cd $MFPX_BASE/lists;
+	for i in $FILES
+	do
+		echo "[PROCESSING] $i";
+		if [ `file -b --mime-encoding $i` = "iso-8859-1" ]
+		then
+			echo "[CONVERTING] $i to utf-8";
+			iconv -f iso-8859-1 -t utf-8 $i -o corr_$i;
+			mv corr_$i $i;
+		fi
+	done
+	cd ->/dev/null;
+}
+
+update () {
+	cd $MFPX_BASE;
+	echo "[ACTION] ------- Extracting lists";
+	extract;
+	echo "[ACTION] ------- Converting lists";
+	convert;
+	echo "[ACTION] ------- Loading Updated Databases"
+	sqlite3 fpx.db ".read scripts/upd.sql"
+	if [ $? -ne 0 ];then echo "Fail running update";exit;fi
+	cd ->/dev/null;
+}
+
+usage() {
+	echo "Usage: mfpx [COMMAND]"
+	echo "Extracts, and processes ELO rating lists."
+	echo "Currently the portuguese chess federation."
+	echo "Options:";
+	echo "    -h,--help   -- display help and exit";
+	echo "    --version   -- display version and exit";
+	echo "    -i          -- Open database iteractively";
+	echo "    -u          -- Update lists";
+	echo "Examples:"
+	echo "    mfpx -u         -- updates database"
+	echo ""
+	echo "Report bugs to <cpmachado@protonmail.com>"
+	echo "or file a issue at https://github.com/cpmachado/bin"
+}
+
+version() {
+	echo "mfpx $VERSION"
+	echo "Copyright (C) 2020 Carlos Pinto Machado"
+	echo "Written by Carlos A. Pinto Machado"
+}
+
+
+case $1 in
+	--version)
+		version
+		exit
+		;;
+	-h)
+		usage
+		exit
+		;;
+	--help)
+		usage
+		exit
+		;;
+	-i)
+		sqlite3 $MFPX_DB
+		exit
+		;;
+	-u)
+		update
+		exit
+		;;
+	*)
+		usage
+		exit
+		;;
+esac
+
