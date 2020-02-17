@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=1.1.0
+VERSION=1.1.1
 
 FILES="blitz.csv classic.csv rapid.csv"
 
@@ -76,6 +76,7 @@ usage() {
 	echo "Usage: mfpx [COMMAND]"
 	echo "Extracts, and processes ELO rating lists."
 	echo "Currently the portuguese chess federation."
+	echo ""
 	echo "Options:";
 	echo "    -h,--help   -- display help and exit";
 	echo "    --version   -- display version and exit";
@@ -86,7 +87,7 @@ usage() {
 	echo "    -r [SCRIPT] -- Run installed scripts";
 	echo "    -c [SCRIPT] -- Run custom script";
 	echo "Examples:"
-	echo "    mfpx -u     -- updates database"
+	echo "    mfpx -u  -- updates database"
 	echo ""
 	echo "Report bugs to <cpmachado@protonmail.com>"
 	echo "or file a issue at https://github.com/cpmachado/bin"
