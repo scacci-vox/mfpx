@@ -1,8 +1,9 @@
 #!/bin/sh
 
-VERSION=1.0.0
+VERSION=1.1.0
 
 FILES="blitz.csv classic.csv rapid.csv"
+
 
 if [ -z $MFPX_BASE ]; then
 	if [ -z $XDG_DATA_HOME ]; then
@@ -45,6 +46,8 @@ convert () {
 			iconv -f iso-8859-1 -t utf-8 $i -o corr_$i;
 			mv corr_$i $i;
 		fi
+		tail -n +2 $i >corr_$i;
+		mv corr_$i $i;
 	done
 	cd ->/dev/null;
 }
@@ -61,6 +64,14 @@ update () {
 	cd ->/dev/null;
 }
 
+print_mfpx () {
+	echo "base: $MFPX_BASE";
+	echo "db: $MFPX_DB";
+	echo "lists: $MFPX_BASE/lists";
+	echo "log: $MFPX_LOG";
+	echo "scripts: $MFPX_BASE/scripts";
+}
+
 usage() {
 	echo "Usage: mfpx [COMMAND]"
 	echo "Extracts, and processes ELO rating lists."
@@ -70,8 +81,12 @@ usage() {
 	echo "    --version   -- display version and exit";
 	echo "    -i          -- Open database iteractively";
 	echo "    -u          -- Update lists";
+	echo "    -p          -- Print relevants environment variables";
+	echo "    -l          -- List installed scripts";
+	echo "    -r [SCRIPT] -- Run installed scripts";
+	echo "    -c [SCRIPT] -- Run custom script";
 	echo "Examples:"
-	echo "    mfpx -u         -- updates database"
+	echo "    mfpx -u     -- updates database"
 	echo ""
 	echo "Report bugs to <cpmachado@protonmail.com>"
 	echo "or file a issue at https://github.com/cpmachado/bin"
@@ -86,28 +101,57 @@ version() {
 
 case $1 in
 	--version)
-		version
-		exit
+		version;
+		exit;
 		;;
 	-h)
-		usage
-		exit
+		usage;
+		exit;
 		;;
 	--help)
-		usage
-		exit
+		usage;
+		exit;
 		;;
 	-i)
-		sqlite3 $MFPX_DB
-		exit
+		sqlite3 $MFPX_DB;
+		exit;
 		;;
 	-u)
-		update
-		exit
+		update;
+		exit;
+		;;
+	-p)
+		print_mfpx;
+		exit;
+		;;
+	-l)
+		echo "-----------------------";
+		echo "Scripts present in mfpx";
+		echo "-----------------------";
+		ls -1 $MFPX_BASE/scripts;
+		echo "-----------------------";
+		exit;
+		;;
+	-r)
+		cd $MFPX_BASE;
+		if [ $# -ne 2 -o ! -f "scripts/"$2 ];then
+			usage;
+		else
+			sqlite3 $MFPX_DB ".read scripts/"$2;
+		fi
+		exit;
+		;;
+	-c)
+		if [ $# -ne 2 -o ! -f $2 ];then
+			usage;
+		else
+			sqlite3 $MFPX_DB ".read $2";
+		fi
+		exit;
 		;;
 	*)
-		usage
-		exit
+		usage;
+		exit;
 		;;
 esac
 

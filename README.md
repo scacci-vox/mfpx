@@ -16,8 +16,13 @@ FPX is the Portuguese Chess Federation, aka Federação Portuguesa de Xadrez.
       --version   -- display version and exit
       -i          -- Open database iteractively
       -u          -- Update lists
+      -p          -- Print relevants environment variables
+      -l          -- List installed scripts
+      -r [SCRIPT] -- Run installed scripts
+      -c [SCRIPT] -- Run custom script
   Examples:
-      mfpx -u         -- updates database
+      mfpx -u     -- updates database
+
   Report bugs to <cpmachado@protonmail.com>
   or file a issue at https://github.com/cpmachado/bin
 ```
