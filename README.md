@@ -80,6 +80,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 [FPX]: http://www.fpx.pt
-[Scacci Vox]: https://github.com/scacci-vox
+[Scacci Vox]: https://github.com/scaccivox
 [cpmachado]: https://cpmachado.github.io
-
